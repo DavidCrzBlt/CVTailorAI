@@ -2,7 +2,8 @@ from app.services.langchain_service import refine_section
 from app.utils.sections import CV_SECTIONS
 from pathlib import Path
 import re, textwrap
-
+from typing import Dict
+from app.db import models
 
 def refine_cv_sections(current_sections: dict, job_description: str) -> dict:
     refined = {}
@@ -42,13 +43,49 @@ def generate_new_cv(cv_template_path: Path, output_path: Path, user, refined_sec
     return output_path
 
 
-def collect_current_sections(user) -> dict:
+def collect_current_sections(user: models.UserProfile, db) -> Dict[str, str]:
+    """
+    Combina información del usuario con sus tablas relacionadas
+    (skills, experiences, education, etc.)
+    y la devuelve lista para pasar al LLM.
+    """
+    # --- Executive Summary (headline) ---
+    executive_summary = user.headline or ""
+
+    # --- Work Experience ---
+    experiences = db.query(models.Experience).filter_by(user_id=user.id).all()
+    exp_text = ""
+    for exp in experiences:
+        exp_text += f"### {exp.company} — {exp.position or ''}\n"
+        if exp.start_date or exp.end_date:
+            exp_text += f"({exp.start_date or ''} - {exp.end_date or ''})\n"
+        exp_text += f"{exp.achievements or ''}\n\n"
+
+    # --- Key Skills ---
+    skills = db.query(models.Skill).filter_by(user_id=user.id).all()
+    skill_lines = [f"- {s.name} ({s.category or ''}, Level {s.level or 'N/A'})" for s in skills]
+    skills_text = "\n".join(skill_lines)
+
+    # --- Technical Tools (puede ser subset de skills si quieres filtrarlo después) ---
+    tools = [s.name for s in skills if s.category and s.category.lower() in ("tools", "framework", "platform")]
+    tools_text = ", ".join(tools) if tools else user.tools or ""
+
+    # --- Education ---
+    education = db.query(models.Education).filter_by(user_id=user.id).all()
+    edu_text = ""
+    for e in education:
+        edu_text += f"**{e.degree}**, {e.institution} ({e.start_year or ''}-{e.end_year or ''})\n"
+        if e.description:
+            edu_text += f"{e.description}\n\n"
+
+    # --- Training (por ahora vacío o rellenable manualmente) ---
+    training_text = user.skills or ""
+
     return {
-        "executive_summary": user.headline or "",
-        "work_experience": user.experience_md or "",
-        "key_skills": user.skills or "",
-        "technical_tools": user.tools or "",
-        # Si aún no tienes estos campos en BD, déjalos vacíos o fijos:
-        "education": "",
-        "training": "",
+        "executive_summary": executive_summary,
+        "work_experience": exp_text.strip(),
+        "key_skills": skills_text.strip(),
+        "technical_tools": tools_text.strip(),
+        "education": edu_text.strip(),
+        "training": training_text.strip()
     }

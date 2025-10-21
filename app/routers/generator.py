@@ -51,8 +51,9 @@ def refine_cv(user_id: int, job_id: int, db: Session = Depends(get_db)):
     template_path = Path(__file__).parent.parent / "templates" / "cv_template.md"
     output_path = Path("generated") / f"cv_refined_{user.id}_{job.id}.md"
 
-    current_sections = collect_current_sections(user)
+    current_sections = collect_current_sections(user, db)
     refined_sections = refine_cv_sections(current_sections, job.raw_description)
+
 
     generate_new_cv(template_path, output_path, user, refined_sections)
     return {"message": "Refined CV generated", "path": str(output_path)}
