@@ -1,40 +1,41 @@
 # {name}
 
-{location}  
-{telephone}  
-{email}  
-{linkedin}  
+{location} | +52 {telephone} | {email}
+LinkedIn: {linkedin}
+*(Open to relocation + remote work.)*
 
 ---
 
-## Executive Summary
+## EXECUTIVE SUMMARY
+
 {executive_summary}
 
 ---
 
-## Work Experience
+## WORK EXPERIENCE
+
 {work_experience}
 
 ---
 
-## Key Skills
+## KEY SKILLS
+
 {key_skills}
 
 ---
 
-## Technical Tools
+### TECHNICAL TOOLS
+
 {technical_tools}
 
 ---
 
-## Education
+## EDUCATION
+
 {education}
 
 ---
 
-## Further Training
-{training}
+## FURTHER TRAINING
 
----
-
-Open to relocation and remote work.
+{further_training}

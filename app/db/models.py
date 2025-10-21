@@ -68,3 +68,17 @@ class JobPosting(Base):
     source_url = Column(String(500), nullable=True)
     raw_description = Column(Text, nullable=False)          # texto pegado o parseado
     created_at = Column(DateTime, server_default=func.now())
+
+class Application(Base):
+    __tablename__ = "applications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("user_profiles.id", ondelete="CASCADE"))
+    job_id = Column(Integer, ForeignKey("job_postings.id", ondelete="CASCADE"))
+    cv_md = Column(Text, nullable=True)
+    cover_letter_md = Column(Text, nullable=True)
+    email_md = Column(Text, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    user = relationship("UserProfile")
+    job = relationship("JobPosting")
