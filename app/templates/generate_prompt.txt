@@ -5,6 +5,7 @@ RULES:
 2. Keep the tone formal, concise, and ATS-friendly.
 3. Use bullet points when listing responsibilities or achievements.
 4. Avoid emojis, symbols, or excessive adjectives.
+5. Consider Markdown format 
 
 TASK:
 You will receive the current text of a CV section and a job description.
