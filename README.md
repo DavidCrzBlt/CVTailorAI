@@ -20,6 +20,7 @@ El proyecto se ejecuta localmente con **FastAPI** y almacena las vacantes aplica
 
 ## 🧩 Estructura del Proyecto
 
+```
 CVTailorAI/
 │
 ├── app/
@@ -48,3 +49,4 @@ CVTailorAI/
 ├── requirements.txt
 ├── README.md
 └── .env.example # Variables de entorno (DB_URL, API_KEYS, etc.)
+```
