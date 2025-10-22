@@ -16,7 +16,6 @@ def refine_cv_sections(current_sections: dict, job_description: str) -> dict:
     return refined
 
 
-
 def fill_template(template_text: str, replacements: dict) -> str:
     """
     Sustituye los placeholders {key} por su valor en replacements.
@@ -30,12 +29,24 @@ def fill_template(template_text: str, replacements: dict) -> str:
 
 def generate_new_cv(cv_template_path: Path, output_path: Path, user, refined_sections: dict):
     template = cv_template_path.read_text(encoding="utf-8")
+
+    education_md = ""
+    for edu in sorted(user.education_set, key=lambda e: e.end_year or "", reverse=True):
+        education_md += f"**{edu.degree}**, {edu.institution} ({edu.start_year or ''}–{edu.end_year or ''}) \n - {edu.description} \n"
+
+    training_md = " | ".join(
+    f"{t.course_name} **({t.platform})**" for t in user.training_set
+    )
+
+
     replacements = {
         "name": user.full_name,
-        "location": "Toluca, Mexico",
-        "telephone": "+52 722 744 4949",
-        "email": "david.crzbel@gmail.com",
-        "linkedin": "https://www.linkedin.com/in/david-cruz-beltran/",
+        "location": user.location,
+        "telephone": user.telephone,
+        "email": user.email,
+        "linkedin": user.linkedin_url,
+        "education": education_md,
+        "further_training": training_md,
         **refined_sections,
     }
     filled = fill_template(template, replacements)
@@ -63,29 +74,29 @@ def collect_current_sections(user: models.UserProfile, db) -> Dict[str, str]:
 
     # --- Key Skills ---
     skills = db.query(models.Skill).filter_by(user_id=user.id).all()
-    skill_lines = [f"- {s.name} ({s.category or ''}, Level {s.level or 'N/A'})" for s in skills]
-    skills_text = "\n".join(skill_lines)
+    skill_lines = [f"{s.name} ({s.category or ''}, Level {s.level or 'N/A'})" for s in skills]
+    skills_text = " | ".join(skill_lines)
 
     # --- Technical Tools (puede ser subset de skills si quieres filtrarlo después) ---
-    tools = [s.name for s in skills if s.category and s.category.lower() in ("tools", "framework", "platform")]
-    tools_text = ", ".join(tools) if tools else user.tools or ""
+    tools = db.query(models.Tool).filter_by(user_id=user.id).all()
 
-    # --- Education ---
-    education = db.query(models.Education).filter_by(user_id=user.id).all()
-    edu_text = ""
-    for e in education:
-        edu_text += f"**{e.degree}**, {e.institution} ({e.start_year or ''}-{e.end_year or ''})\n"
-        if e.description:
-            edu_text += f"{e.description}\n\n"
+    # Creamos un diccionario agrupado por categoría
+    tools_by_category = {}
+    for tool in tools:
+        cat = (tool.category or "Other").strip().title()
+        tools_by_category.setdefault(cat, []).append(tool.name)
 
-    # --- Training (por ahora vacío o rellenable manualmente) ---
-    training_text = user.skills or ""
+    # Construimos el texto final por categoría
+    tools_text = ""
+    for category, names in sorted(tools_by_category.items()):
+        tools_text += f"**{category}:** " + " | ".join(sorted(names)) + "\n"
+
+    tools_text = tools_text.strip() or ""
+
 
     return {
         "executive_summary": executive_summary,
         "work_experience": exp_text.strip(),
         "key_skills": skills_text.strip(),
         "technical_tools": tools_text.strip(),
-        "education": edu_text.strip(),
-        "training": training_text.strip()
     }

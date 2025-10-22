@@ -3,6 +3,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 from dotenv import load_dotenv
 from pathlib import Path
+from app.core.paths import TEMPLATES_DIR
 
 load_dotenv()
 
@@ -25,8 +26,12 @@ def test_prompt(message: str):
     response = llm.invoke([HumanMessage(content=message)])
     return response.content
 
-def refine_section(section_name: str, section_text: str, job_description: str) -> str:
-    template_path = Path(__file__).parent.parent / "templates" / "generate_prompt.txt"
+def refine_section(
+        section_name: str, 
+        section_text: str, 
+        job_description: str) -> str:
+    
+    template_path = TEMPLATES_DIR / "generate_prompt.txt"
     template_text = template_path.read_text(encoding="utf-8")
 
     prompt = template_text.format(

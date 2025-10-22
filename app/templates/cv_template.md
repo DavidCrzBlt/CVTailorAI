@@ -1,10 +1,12 @@
-# {name}
+# **{name}**
 
-{location} | +52 {telephone} | {email}
+{location} | {telephone} | {email}
+
 LinkedIn: {linkedin}
-*(Open to relocation + remote work.)*
 
----
+**(Open to relocation + remote work.)**
+
+----------------
 
 ## EXECUTIVE SUMMARY
 

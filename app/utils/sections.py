@@ -3,6 +3,4 @@ CV_SECTIONS = [
     "work_experience",
     "key_skills",
     "technical_tools",
-    "education",
-    "training"
 ]

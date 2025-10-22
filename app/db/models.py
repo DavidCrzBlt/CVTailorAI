@@ -10,6 +10,10 @@ class UserProfile(Base):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String(120), nullable=False)
     headline = Column(String(200), nullable=True)
+    location = Column(String(200), nullable=True)
+    telephone = Column(String(50), nullable=True)
+    email = Column(String(120), nullable=True)
+    linkedin_url = Column(String(250), nullable=True)
     skills = Column(Text, nullable=True)
     tools = Column(Text, nullable=True)
     experience_md = Column(Text, nullable=True)
@@ -19,6 +23,9 @@ class UserProfile(Base):
     skill_set = relationship("Skill", back_populates="user", cascade="all, delete")
     experience_set = relationship("Experience", back_populates="user", cascade="all, delete")
     education_set = relationship("Education", back_populates="user", cascade="all, delete")
+    training_set = relationship("Training", back_populates="user", cascade="all, delete")
+    tools_set = relationship("Tool", back_populates="user", cascade="all, delete")
+
 
 # --- SKILLS ---
 class Skill(Base):
@@ -58,6 +65,26 @@ class Education(Base):
     description = Column(Text, nullable=True)
 
     user = relationship("UserProfile", back_populates="education_set")
+
+# --- FURTHER TRAINING ---
+class Training(Base):
+    __tablename__ = "training"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("user_profiles.id", ondelete="CASCADE"))
+    course_name = Column(String(200), nullable=False)
+    platform = Column(String(200), nullable=False)
+
+    user = relationship("UserProfile", back_populates="training_set")
+
+class Tool(Base):
+    __tablename__ = "toolss"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("user_profiles.id", ondelete="CASCADE"))
+    name = Column(String(100), nullable=False)
+    category = Column(String(100), nullable=True)
+    level = Column(Integer, nullable=True)
+
+    user = relationship("UserProfile", back_populates="tools_set")
 
 
 class JobPosting(Base):
